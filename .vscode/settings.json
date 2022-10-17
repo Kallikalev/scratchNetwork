@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "*.species": "jsonc",
+        "iostream": "cpp"
+    }
+}
