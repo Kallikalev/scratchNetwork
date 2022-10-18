@@ -1,36 +1,44 @@
 #include <vector>
+#include <array>
 
 class Network {
 public:
-    static std::vector<float> runNetwork(std::vector<float> inputs) {
+    static std::array<float,2> runNetwork(std::array<float,2> inputs) {
 
-        // initialize trainable properties
-        float weight0_1 = 7;
-        float weight0_2 = -2.3;
-        float bias0 = 2.3;
+        // number of neurons, number of inputs
+        float weights[2][2] = {
+            {7,-2.3}, // neuron 0 input weights
+            {0.2,-0.54} // neuron 1 input weights
+        };
+        // number of neurons
+        float biases[2] = {2.3,10};
+    
+        // number of neurons, number of inputs (which is number of neurons last layer)
+        float oWeights[2][2] = {
+            {1,1}, // neuron 0 input weights
+            {1,2} // neuron 1 input weights
+        };
+        // number of neurons
+        float oBiases[2] = {0,0.5};
 
-        float weight1_1 = 0.2;
-        float weight1_2 = -0.54;
-        float bias1 = 10;
+        // output of each neuron
+        float neuronVals[2];
+        for (int i = 0; i < 2; i++) { // number of neurons
+            neuronVals[i] = biases[i];
+            for (int j = 0; j < 2; j++) { // number of inputs
+                neuronVals[0] += inputs[j] * weights[i][j];
+            }
+        }
 
-        float oWeight0_1 = 1.0;
-        float oWeight0_2 = 1.0;
-        float oBias0 = 0;
+        std::array<float,2> outputs;
 
-        float oWeight1_1 = 1.0;
-        float oWeight1_2 = 2.0;
-        float oBias1 = 0.5;
+        for (int i = 0; i < 2; i++) { // number of neurons
+            outputs[i] = oBiases[i];
+            for (int j = 0; j < 2; j++) { // number of inputs
+                outputs[i] += neuronVals[j] * oWeights[i][j];
+            }
+        }
 
-
-        // do node operations
-        float node0 = inputs[0] * weight0_1 + inputs[1] * weight1_2 + bias0;
-        float node1 = inputs[0] * weight1_1 + inputs[1] * weight1_2 + bias1;
-
-        std::vector<float> outputs;
-
-
-        outputs.push_back(node0 * oWeight0_1 + node1 * oWeight0_2 + oBias0);
-        outputs.push_back(node0 * oWeight1_1 + node1 * oWeight1_2 + oBias1);
         return outputs;
     }
 };
