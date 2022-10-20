@@ -48,6 +48,7 @@ public:
                 weights[i][j] = dist(gen);
             }
         }
+        
     }
 
     std::vector<float> runLayer(std::vector<float> inputs) {

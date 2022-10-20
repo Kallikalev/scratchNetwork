@@ -62,6 +62,7 @@
         "variant": "cpp",
         "algorithm": "cpp",
         "numeric": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "*.ds_store": "cpp"
     }
 }

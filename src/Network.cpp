@@ -1,5 +1,6 @@
 #include <vector>
 #include <random>
+#include <cmath>
 
 #include "Layer.cpp"
 
@@ -39,5 +40,16 @@ public:
             inputs = layers[i].runLayer(inputs);
         }
         return inputs;
+    }
+
+    static float getLoss(std::vector<float> outputs, std::vector<float> expectedOutputs) {
+        float sumError = 0;
+        // expectedOutputs and outputs must be the same size
+        // mean-squared error formula
+        for (int i = 0; i < expectedOutputs.size(); i++) {
+            sumError += pow(outputs[i] - expectedOutputs[i],2);
+        }
+
+        return sumError / expectedOutputs.size();
     }
 };

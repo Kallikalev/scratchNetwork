@@ -1,6 +1,6 @@
 #include <iostream>
-#include <stdio.h>
-#include <math.h>
+// #include <stdio.h>
+// #include <math.h>
 #include <vector>
 
 
@@ -28,8 +28,13 @@ int main() {
             inputs[1] = y;
 
             std::vector<float> outputs = myNetwork.runNetwork(inputs);
+            std::vector<float> expectedOutputs(2);
+            expectedOutputs[0] = 1;
+            expectedOutputs[1] = 1;
+            float loss = Network::getLoss(outputs,expectedOutputs);
 
             std::cout << "(" << std::to_string(x) << "," << std::to_string(y) << "): " << std::to_string(outputs[0]) << ", " << std::to_string(outputs[1]) << std::endl;
+            std::cout << "Loss: " << std::to_string(loss) << std::endl;
         }
     }
 
