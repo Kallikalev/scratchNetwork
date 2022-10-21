@@ -7,35 +7,51 @@
 #include "Network.cpp"
 
 int main() {
-    std::vector<std::vector<int> > networkLayout(2);
-    networkLayout[0] = std::vector<int>(2);
-    networkLayout[1] = std::vector<int>(2);
-    // first layer has 2 inputs and 3 nodes
-    networkLayout[0][0] = 2;
-    networkLayout[0][1] = 3;
-    // second/output layer has 3 inputs and 2 nodes
-    networkLayout[1][0] = 3;
-    networkLayout[1][1] = 2;
+    std::vector<std::vector<int> > networkLayout = {
+        {2,3}, // first layer has 2 inputs and 3 neurons
+        {3,15}, // second/output layer has 3 inputs and 2 neurons
+        {15,30},
+        {30,25},
+        {25,2}
+    };
     Network myNetwork = Network(networkLayout);
-    myNetwork.randomizeNetwork();
+    
+
+    // array of inputs and their expected outputs
+    std::vector<std::vector<std::vector<float>>> trainingData = {
+        {{0,0},{0,0}},
+        {{0,1},{1,0}},
+        {{1,0},{1,0}},
+        {{1,1},{2,0}},
+        {{1,2},{3,0}},
+        {{2,1},{3,0}}
+        // {{0,0},{0,1}},
+        // {{0,1},{1,0}},
+        // {{1,0},{1,0}},
+        // {{1,1},{0,0}}
+    };
 
 
+    myNetwork.randomizeNetwork(); // randomize each time to get good network
 
-    for (int y = 0; y < 5; y++) {
-        for (int x = 0; x < 5; x++) {
-            std::vector<float> inputs(2);
-            inputs[0] = x;
-            inputs[1] = y;
+    for (int iter = 0; iter < 1000; iter++) {
+        float averageLoss = 0;
 
-            std::vector<float> outputs = myNetwork.runNetwork(inputs);
-            std::vector<float> expectedOutputs(2);
-            expectedOutputs[0] = 1;
-            expectedOutputs[1] = 1;
-            float loss = Network::getLoss(outputs,expectedOutputs);
+        for (int n = 0; n < trainingData.size(); n++) {
 
-            std::cout << "(" << std::to_string(x) << "," << std::to_string(y) << "): " << std::to_string(outputs[0]) << ", " << std::to_string(outputs[1]) << std::endl;
-            std::cout << "Loss: " << std::to_string(loss) << std::endl;
+
+            std::vector<float> input = trainingData[n][0];
+            std::vector<float> expectedOutput = trainingData[n][1];
+
+            float loss = myNetwork.gradientDescent(input,expectedOutput,0.1);
+
+            averageLoss += loss;
+
         }
+
+        averageLoss /= trainingData.size();
+        
+        std::cout << "Average Loss: " << std::to_string(averageLoss) << std::endl;
     }
 
     return 0;
