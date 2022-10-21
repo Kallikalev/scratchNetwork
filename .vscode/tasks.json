@@ -12,8 +12,6 @@
                 "-fansi-escape-codes",
                 "-I${workspaceFolder}/include",
                 "-L${workspaceFolder}/lib",
-                "${workspaceFolder}/include/glad/glad.c",
-                "${workspaceFolder}/lib/libglfw.3.3.dylib",
                 "${file}",
                 "-framework",
                 "Cocoa",

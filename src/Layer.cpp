@@ -102,6 +102,8 @@ public:
     }
 
     void applyDerivatives(float learningRate) {
+
+
         for (int i = 0; i < numNeurons; i++) {
             biases[i] -= biasDerivatives[i] * learningRate;
             for (int j = 0; j < numInputs; j++) {

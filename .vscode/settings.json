@@ -63,6 +63,8 @@
         "algorithm": "cpp",
         "numeric": "cpp",
         "random": "cpp",
-        "*.ds_store": "cpp"
+        "*.ds_store": "cpp",
+        "__tree": "cpp",
+        "map": "cpp"
     }
 }
