@@ -3,7 +3,6 @@
 // #include <math.h>
 #include <vector>
 
-
 #include "Network.cpp"
 
 int main() {
