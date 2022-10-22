@@ -10,8 +10,6 @@
                 "-Wall",
                 "-fcolor-diagnostics",
                 "-fansi-escape-codes",
-                "-I${workspaceFolder}/include",
-                "-L${workspaceFolder}/lib",
                 "${file}",
                 "-framework",
                 "Cocoa",

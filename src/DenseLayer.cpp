@@ -1,7 +1,9 @@
 #include <vector>
 #include <random>
 
-class Layer {
+#include "TanhLayer.cpp"
+
+class DenseLayer {
 private:
     std::vector<std::vector<float> > weights;
     std::vector<float> biases;
@@ -11,11 +13,13 @@ private:
     std::vector<float> inputDerivatives;
     std::vector<std::vector<float> > weightDerivatives;
     std::vector<float> biasDerivatives;
+
+    TanhLayer activation;
 public:
     std::vector<float> input;
     std::vector<float> output;
 
-    Layer(int _numInputs, int _numNeurons) {
+    DenseLayer(int _numInputs, int _numNeurons) : activation(_numNeurons) {
         numInputs = _numInputs;
         numNeurons = _numNeurons;
 
@@ -39,7 +43,7 @@ public:
         output = std::vector<float>(numNeurons);
     }
 
-    Layer(std::vector<std::vector<float> > _weights, std::vector<float> _biases) {
+    DenseLayer(std::vector<std::vector<float> > _weights, std::vector<float> _biases): activation(_weights.size())  {
         numInputs = _weights[0].size();
         numNeurons = _weights.size();
         weights = _weights;
@@ -66,21 +70,20 @@ public:
                 output[i] += input[j] * weights[i][j];
             }
         }
-        return output;
+        return activation.forwardPropogate(output);
+        // return output;
     }
 
     // input is the inputs from the previous layer to the current layer
     // nextDerivates is derivative of error with respect to each of the neurons in the current layer, size = number of neurons in current layer
     // return value is derivate of error with respect to each of the inputs of the current layer, size = size of input
     std::vector<float> getDerivatives(std::vector<float> nextDerivatives) {
-
+        nextDerivatives = activation.getDerivatives(nextDerivatives);
         inputDerivatives = std::vector<float>(numInputs);
         
         for (int i = 0; i < numInputs; i++) {
             for (int j = 0; j < numNeurons; j++) {
-                float n1 = nextDerivatives[j];
-                float n2 = weights[j][i];
-                inputDerivatives[i] += n1 * n2;
+                inputDerivatives[i] += nextDerivatives[j] * weights[j][i];
             }
         }
 
@@ -94,7 +97,7 @@ public:
         for (int i = 0; i < numNeurons; i++) {
             weightDerivatives[i] = std::vector<float>(numInputs);
             for (int j = 0; j < numInputs; j++) {
-                weightDerivatives[i][j] = input[j]*nextDerivatives[i];
+                weightDerivatives[i][j] = input[j] * nextDerivatives[i];
             }
         }
         
@@ -102,8 +105,6 @@ public:
     }
 
     void applyDerivatives(float learningRate) {
-
-
         for (int i = 0; i < numNeurons; i++) {
             biases[i] -= biasDerivatives[i] * learningRate;
             for (int j = 0; j < numInputs; j++) {

@@ -2,11 +2,11 @@
 #include <random>
 #include <cmath>
 
-#include "Layer.cpp"
+#include "DenseLayer.cpp"
 
 class Network {
 private:
-    std::vector<Layer> layers;
+    std::vector<DenseLayer> layers;
 public:
     /*
     layout is list of layers, each is an ordered pair of (numInputs,numNeurons)
@@ -20,7 +20,7 @@ public:
 
     Network(std::vector<std::vector<int> > layout) {
         for (int i = 0; i < layout.size(); i++) {
-            layers.push_back(Layer(layout[i][0],layout[i][1]));
+            layers.push_back(DenseLayer(layout[i][0],layout[i][1]));
         }
     }
 
