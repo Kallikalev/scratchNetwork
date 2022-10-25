@@ -70,15 +70,15 @@ public:
                 output[i] += input[j] * weights[i][j];
             }
         }
-        return activation.forwardPropogate(output);
-        // return output;
+        // return activation.forwardPropogate(output);
+        return output;
     }
 
     // input is the inputs from the previous layer to the current layer
     // nextDerivates is derivative of error with respect to each of the neurons in the current layer, size = number of neurons in current layer
     // return value is derivate of error with respect to each of the inputs of the current layer, size = size of input
     std::vector<float> getDerivatives(std::vector<float> nextDerivatives) {
-        nextDerivatives = activation.getDerivatives(nextDerivatives);
+        // nextDerivatives = activation.getDerivatives(nextDerivatives);
         inputDerivatives = std::vector<float>(numInputs);
         
         for (int i = 0; i < numInputs; i++) {
