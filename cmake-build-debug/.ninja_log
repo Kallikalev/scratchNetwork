@@ -1,0 +1,19 @@
+# ninja log v5
+2	278	1669353711421987383	CMakeFiles/scratchNetwork.dir/src/TanhLayer.cpp.o	fd814b6d90704437
+1	347	1669356106208814641	CMakeFiles/scratchNetwork.dir/src/DenseLayer.cpp.o	df244be15d6936bf
+1	497	1669356887466089459	CMakeFiles/scratchNetwork.dir/src/main.cpp.o	f4f798c77f79c3
+2	408	1669356106270889028	CMakeFiles/scratchNetwork.dir/src/Network.cpp.o	5dd02dce617423a8
+497	530	1669356887500939085	scratchNetwork	a56fb9c911db65ed
+1	331	1669357389211781592	CMakeFiles/scratchNetwork.dir/src/DenseLayer.cpp.o	df244be15d6936bf
+2	389	1669357389270506732	CMakeFiles/scratchNetwork.dir/src/Network.cpp.o	5dd02dce617423a8
+1	596	1669357389477049910	CMakeFiles/scratchNetwork.dir/src/main.cpp.o	f4f798c77f79c3
+596	641	1669357389524519106	scratchNetwork	a56fb9c911db65ed
+1	490	1669357402556722507	CMakeFiles/scratchNetwork.dir/src/main.cpp.o	f4f798c77f79c3
+490	521	1669357402590282718	scratchNetwork	a56fb9c911db65ed
+3	402	1669381520881533470	CMakeFiles/scratchNetwork.dir/src/Network.cpp.o	5dd02dce617423a8
+2	589	1669381521069177668	CMakeFiles/scratchNetwork.dir/src/main.cpp.o	f4f798c77f79c3
+589	633	1669381521114899312	scratchNetwork	a56fb9c911db65ed
+1	471	1669381552118470424	CMakeFiles/scratchNetwork.dir/src/main.cpp.o	f4f798c77f79c3
+471	504	1669381552153339601	scratchNetwork	a56fb9c911db65ed
+1	470	1669381610594479480	CMakeFiles/scratchNetwork.dir/src/main.cpp.o	f4f798c77f79c3
+470	503	1669381610629700653	scratchNetwork	a56fb9c911db65ed

@@ -7,6 +7,7 @@ ax = fig.add_subplot(projection='3d')
 with open('output.csv', 'r') as file:
     data = file.read().split(',')
 
+# convert data from strings to numbers
 for i in range(len(data)):
     data[i] = float(data[i])
 

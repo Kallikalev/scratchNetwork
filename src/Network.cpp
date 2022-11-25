@@ -1,6 +1,8 @@
 #include <vector>
 #include <random>
 #include <cmath>
+#include <iostream>
+#include <thread>
 
 #include "DenseLayer.cpp"
 
@@ -34,12 +36,13 @@ public:
     }
 
     // input size must match input of first layer, output size will be number of neuron of last layer
-    std::vector<float> runNetwork(std::vector<float> input) {
-        // re-use inputs variable
+    std::vector<std::vector<float>> runNetwork(std::vector<float> input) {
+        std::vector<std::vector<float>> outputs(layers.size());
         for (int i = 0; i < layers.size(); i++) {
-            input = layers[i].forwardPropogate(input);
+            input = layers[i].forwardPropagate(input);
+            outputs[i] = input;
         }
-        return input;
+        return outputs;
     }
 
     static float getLoss(std::vector<float> outputs, std::vector<float> expectedOutputs) {
@@ -61,15 +64,90 @@ public:
         return derivatives;
     }
 
-    float gradientDescent(std::vector<float> input, std::vector<float> expectedOutput, float learningRate) {
-        std::vector<float> output = runNetwork(input);
-        std::vector<float> gradient = getLossGradient(output,expectedOutput);
+    float gradientDescent(std::vector<float> input, std::vector<float> expectedOutput) {
+        std::vector<std::vector<float>> outputs = runNetwork(input);
+        std::vector<float> gradient = getLossGradient(outputs.back(),expectedOutput);
 
         for (int i = layers.size() - 1; i >= 0; i--) {
-            gradient = layers[i].getDerivatives(gradient);
-            layers[i].applyDerivatives(learningRate);
+            if (i == 0) {
+                gradient = layers[i].getDerivatives(input,outputs[0],gradient);
+            } else {
+                gradient = layers[i].getDerivatives(outputs[i-1],outputs[i],gradient);
+            }
+
         }
-        float loss = getLoss(output,expectedOutput);
+        float loss = getLoss(outputs.back(),expectedOutput);
         return loss;
+    }
+
+    void gradientDescentThreaded(std::vector<float> input, std::vector<float> expectedOutput, float *averageLoss) {
+        std::vector<std::vector<float>> outputs = runNetwork(input);
+        std::vector<float> gradient = getLossGradient(outputs.back(),expectedOutput);
+
+        for (int i = layers.size() - 1; i >= 0; i--) {
+            if (i == 0) {
+                gradient = layers[i].getDerivatives(input,outputs[0],gradient);
+            } else {
+                gradient = layers[i].getDerivatives(outputs[i-1],outputs[i],gradient);
+            }
+
+        }
+        float loss = getLoss(outputs.back(),expectedOutput);
+        *averageLoss += loss;
+    }
+
+    void applyDerivatives(float learnRate) {
+        for (int i = 0; i < layers.size(); i++) {
+            layers[i].applyDerivatives(learnRate);
+        }
+    }
+
+    void train(std::vector<std::vector<std::vector<float>>> trainingData, int numEpochs, int batchSize, float learnRate) {
+        for (int iter = 0; iter < numEpochs; iter++) {
+            float averageLoss = 0;
+            // use auto here because I don't want to deal with all the template mess
+            auto startTime = std::chrono::high_resolution_clock::now();
+            for (int n = 0; n < trainingData.size(); n++) {
+                float loss = gradientDescent(trainingData[n][0],trainingData[n][1]);
+                averageLoss += loss;
+
+                // apply derivatives in batches, or at the end of the epoch if the epoch size isn't divisible by batch size
+                if (n % batchSize == 0 || n == trainingData.size() - 1) {
+                    applyDerivatives(learnRate);
+                }
+            }
+            averageLoss /= trainingData.size();
+
+            auto endTime = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+
+
+            std::cout << "Epoch " + std::to_string(iter) + " Complete. Average Loss: " << std::to_string(averageLoss) + ". Time taken: " + std::to_string(duration.count()) + " milliseconds." << std::endl;
+        }
+    }
+
+    void trainThreaded(std::vector<std::vector<std::vector<float>>> trainingData, int numEpochs, int batchSize, float learnRate) {
+        for (int iter = 0; iter < numEpochs; iter++) {
+            float averageLoss = 0;
+            // use auto here because I don't want to deal with all the template mess
+            auto startTime = std::chrono::high_resolution_clock::now();
+            for (int n = 0; n < trainingData.size(); n += batchSize) {
+                int numThreads = std::min(batchSize,(int)trainingData.size()-n);
+                std::vector<std::thread> threads(numThreads);
+                for (int i = 0; i < numThreads; i++) {
+                    threads[i] = std::thread(&Network::gradientDescentThreaded,this,trainingData[n + i][0],trainingData[n + i][1],&averageLoss);
+                }
+                for (int i = 0; i < threads.size(); i++) {
+                    threads[i].join();
+                }
+                applyDerivatives(learnRate);
+            }
+            averageLoss /= trainingData.size();
+
+            auto endTime = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+
+            std::cout << "Epoch " + std::to_string(iter) + " Complete. Average Loss: " << std::to_string(averageLoss) + ". Time taken: " + std::to_string(duration.count()) + " milliseconds." << std::endl;
+        }
     }
 };
