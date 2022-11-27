@@ -27,7 +27,6 @@ public:
     }
 
     void randomizeNetwork() {
-        
         std::random_device rd;
         std::mt19937 gen(rd());
         for (int i = 0; i < layers.size(); i++) {

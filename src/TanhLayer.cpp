@@ -10,7 +10,7 @@ public:
         numNeurons = _numNeurons;
     }
 
-    std::vector<float> forwardPropagate(std::vector<float> input) const {
+    std::vector<float> forwardPropagate(const std::vector<float> input) const {
         std::vector<float> output (numNeurons);
         for (int i = 0; i < numNeurons; i++) {
             output[i] = tanh(input[i]);
@@ -18,7 +18,7 @@ public:
         return output;
     }
 
-    std::vector<float> getDerivatives(std::vector<float> output, std::vector<float> nextDerivatives) const {
+    std::vector<float> getDerivatives(const std::vector<float> output, const std::vector<float> nextDerivatives) const {
         std::vector<float> inputDerivatives (numNeurons);
         
         for (int i = 0; i < numNeurons; i++) {

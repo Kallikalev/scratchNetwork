@@ -4,6 +4,9 @@
 #include <sstream>
 #include "Network.cpp"
 
+#include "Matrix.cpp"
+
+
 int main() {
 
     int numEpochs = 40;
@@ -54,9 +57,9 @@ int main() {
     std::cout << "Training data processing complete" << std::endl;
 
     std::vector<std::vector<int> > networkLayout = {
-//            {784,50},
-//            {50,10}
-            {784,10}
+            {784,50},
+            {50,10}
+//            {784,10}
     };
 
     Network myNetwork = Network(networkLayout);
@@ -161,4 +164,3 @@ int main() {
 
     return 0;
 }
-
