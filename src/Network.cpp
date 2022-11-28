@@ -20,9 +20,9 @@ public:
     ]
     */
 
-    Network(std::vector<std::vector<int> > layout) {
+    explicit Network(std::vector<std::vector<int> > layout) {
         for (int i = 0; i < layout.size(); i++) {
-            layers.push_back(DenseLayer(layout[i][0],layout[i][1]));
+            layers.emplace_back(DenseLayer(layout[i][0],layout[i][1]));
         }
     }
 
@@ -35,39 +35,40 @@ public:
     }
 
     // input size must match input of first layer, output size will be number of neuron of last layer
-    std::vector<std::vector<float>> runNetwork(std::vector<float> input) {
-        std::vector<std::vector<float>> outputs(layers.size());
+    std::vector<Matrix<float>> runNetwork(Matrix<float> input) {
+        std::vector<Matrix<float>> outputs;
         for (int i = 0; i < layers.size(); i++) {
             input = layers[i].forwardPropagate(input);
-            outputs[i] = input;
+            outputs.push_back(input);
         }
         return outputs;
     }
 
-    static float getLoss(std::vector<float> outputs, std::vector<float> expectedOutputs) {
+    static float getLoss(const Matrix<float> &outputs, const Matrix<float> &expectedOutputs) {
         float sumError = 0;
         // expectedOutputs and outputs must be the same size
         // mean-squared error formula
-        for (int i = 0; i < expectedOutputs.size(); i++) {
-            sumError += pow(outputs[i] - expectedOutputs[i],2);
+        for (int i = 0; i < expectedOutputs.numRows; i++) {
+            sumError += (float)std::pow(outputs.get(i,0) - expectedOutputs.get(i,0),2);
         }
 
-        return sumError / expectedOutputs.size();
+        return sumError / (float)expectedOutputs.numRows;
     }
 
-    static std::vector<float> getLossGradient(std::vector<float> output, std::vector<float> expectedOutput) {
-        std::vector<float> derivatives(output.size());
-        for (int i = 0; i < output.size(); i++) {
-            derivatives[i] = -2.0f/output.size()*(expectedOutput[i] - output[i]);
+    static Matrix<float> getLossGradient(const Matrix<float> &output, const Matrix<float> &expectedOutput) {
+        Matrix<float> derivatives({output.numRows,1});
+        for (int i = 0; i < output.numRows; i++) {
+            float derivative = -2.0f/(float)output.numRows*(expectedOutput.get(i,0) - output.get(i,0));
+            derivatives.set(i,0,derivative);
         }
         return derivatives;
     }
 
-    float gradientDescent(std::vector<float> input, std::vector<float> expectedOutput) {
-        std::vector<std::vector<float>> outputs = runNetwork(input);
-        std::vector<float> gradient = getLossGradient(outputs.back(),expectedOutput);
+    float gradientDescent(const Matrix<float> &input, Matrix<float> &expectedOutput) {
+        std::vector<Matrix<float>> outputs = runNetwork(input);
+        Matrix<float> gradient = getLossGradient(outputs.back(),expectedOutput);
 
-        for (int i = layers.size() - 1; i >= 0; i--) {
+        for (int i = (int)layers.size() - 1; i >= 0; i--) {
             if (i == 0) {
                 gradient = layers[i].getDerivatives(input,outputs[0],gradient);
             } else {
@@ -75,15 +76,14 @@ public:
             }
 
         }
-        float loss = getLoss(outputs.back(),expectedOutput);
-        return loss;
+        return getLoss(outputs.back(),expectedOutput);
     }
 
-    void gradientDescentThreaded(std::vector<float> input, std::vector<float> expectedOutput, float *averageLoss) {
-        std::vector<std::vector<float>> outputs = runNetwork(input);
-        std::vector<float> gradient = getLossGradient(outputs.back(),expectedOutput);
+    void gradientDescentThreaded(const Matrix<float> &input, const Matrix<float> &expectedOutput, float *averageLoss) {
+        std::vector<Matrix<float>> outputs = runNetwork(input);
+        Matrix<float> gradient = getLossGradient(outputs.back(),expectedOutput);
 
-        for (int i = layers.size() - 1; i >= 0; i--) {
+        for (int i = (int)layers.size() - 1; i >= 0; i--) {
             if (i == 0) {
                 gradient = layers[i].getDerivatives(input,outputs[0],gradient);
             } else {
@@ -101,7 +101,7 @@ public:
         }
     }
 
-    void train(std::vector<std::vector<std::vector<float>>> trainingData, int numEpochs, int batchSize, float learnRate) {
+    void train(std::vector<std::vector<Matrix<float>>> trainingData, int numEpochs, int batchSize, float learnRate) {
         for (int iter = 0; iter < numEpochs; iter++) {
             float averageLoss = 0;
             // use auto here because I don't want to deal with all the template mess
@@ -110,12 +110,16 @@ public:
                 float loss = gradientDescent(trainingData[n][0],trainingData[n][1]);
                 averageLoss += loss;
 
+                if (n % (batchSize * 16) == 0) {
+                    std::cout << "On item #" + std::to_string(n) + " Average loss:" + std::to_string(averageLoss/(float)n) << std::endl;
+                }
+
                 // apply derivatives in batches, or at the end of the epoch if the epoch size isn't divisible by batch size
                 if (n % batchSize == 0 || n == trainingData.size() - 1) {
                     applyDerivatives(learnRate);
                 }
             }
-            averageLoss /= trainingData.size();
+            averageLoss /= (float)trainingData.size();
 
             auto endTime = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
@@ -125,7 +129,7 @@ public:
         }
     }
 
-    void trainThreaded(std::vector<std::vector<std::vector<float>>> trainingData, int numEpochs, int batchSize, float learnRate) {
+    void trainThreaded(std::vector<std::vector<Matrix<float>>> trainingData, int numEpochs, int batchSize, float learnRate) {
         for (int iter = 0; iter < numEpochs; iter++) {
             float averageLoss = 0;
             // use auto here because I don't want to deal with all the template mess
@@ -141,7 +145,7 @@ public:
                 }
                 applyDerivatives(learnRate);
             }
-            averageLoss /= trainingData.size();
+            averageLoss /= (float)trainingData.size();
 
             auto endTime = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);

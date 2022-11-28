@@ -9,7 +9,7 @@
 
 int main() {
 
-    int numEpochs = 40;
+    int numEpochs = 35;
     float learnRate = 0.01;
     int batchSize = 16;
 
@@ -39,7 +39,7 @@ int main() {
 
     std::cout << "Processing training data" << std::endl;
 
-    std::vector<std::vector<std::vector<float>>> trainingData;
+    std::vector<std::vector<Matrix<float>>> trainingData;
 
     // skip first line of csv file
     for (int i = 1; i < content.size(); i++) {
@@ -51,7 +51,7 @@ int main() {
         for (int j = 1; j < 784 + 1; j++) {
             pixelInput[j - 1] = std::stof(row[j])/255; // pixel data is 0-255, convert that to 0-1 value
         }
-        trainingData.push_back({pixelInput,labelOutput});
+        trainingData.push_back({Matrix<float>({784,1},pixelInput),Matrix<float>({10,1},labelOutput)});
     }
 
     std::cout << "Training data processing complete" << std::endl;
@@ -96,7 +96,7 @@ int main() {
 
     std::cout << "Processing test data" << std::endl;
 
-    std::vector<std::vector<std::vector<float>>> testData;
+    std::vector<std::vector<Matrix<float>>> testData;
 
     // skip first line of csv file
     for (int i = 1; i < content.size(); i++) {
@@ -108,7 +108,7 @@ int main() {
         for (int j = 1; j < 784 + 1; j++) {
             pixelInput[j - 1] = std::stof(row[j])/255; // pixel data is 0-255, convert that to 0-1 value
         }
-        testData.push_back({pixelInput,labelOutput});
+        testData.push_back({Matrix<float>({784,1},pixelInput),Matrix<float>({10,1},labelOutput)});
     }
 
     std::cout << "Test data processing complete" << std::endl;
@@ -126,16 +126,16 @@ int main() {
     int numCorrect = 0;
 
     for (int i = 0; i < testData.size(); i++) {
-        std::vector<float> output = myNetwork.runNetwork(testData[i][0]).back();
+        Matrix<float> output = myNetwork.runNetwork(testData[i][0]).back();
         int max_input = 0;
-        for (int j = 1; j < testData[i][1].size(); j++) {
-            if (testData[i][1][j] > testData[i][1][max_input]) {
+        for (int j = 1; j < testData[i][1].data.size(); j++) {
+            if (testData[i][1].data[j] > testData[i][1].data[max_input]) {
                 max_input = j;
             }
         }
         int max_output = 0;
-        for (int j = 1; j < output.size(); j++) {
-            if (output[j] > output[max_output]) {
+        for (int j = 1; j < output.numRows; j++) {
+            if (output.get(j,0) > output.get(max_output,0)) {
                 max_output = j;
             }
         }

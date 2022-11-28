@@ -1,30 +1,18 @@
-#include <vector>
 #include <cmath>
+#include "Matrix.cpp"
 
 class TanhLayer {
-private:
-    int numNeurons;
 
 public:
-    explicit TanhLayer(int _numNeurons) {
-        numNeurons = _numNeurons;
+    static Matrix<float> forwardPropagate(const Matrix<float> &input) {
+        return Matrix<float>::elementOp(input,tanh);
     }
 
-    std::vector<float> forwardPropagate(const std::vector<float> input) const {
-        std::vector<float> output (numNeurons);
-        for (int i = 0; i < numNeurons; i++) {
-            output[i] = tanh(input[i]);
-        }
-        return output;
-    }
+    static Matrix<float> getDerivatives(const Matrix<float> &output, const Matrix<float>& nextDerivatives) {
 
-    std::vector<float> getDerivatives(const std::vector<float> output, const std::vector<float> nextDerivatives) const {
-        std::vector<float> inputDerivatives (numNeurons);
-        
-        for (int i = 0; i < numNeurons; i++) {
-            inputDerivatives[i] = (1.0f - (float)pow(output[i],2)) * nextDerivatives[i];
-        }
-        
+        Matrix<float> inputDerivatives = Matrix<float>::elementOp(output,[](float n) {return 1 - (float)std::pow(n,2.0f);});
+        inputDerivatives.hProduct(nextDerivatives);
+
         return inputDerivatives;
     }
 };
